@@ -7,6 +7,8 @@ import useUserStore from './store/useUserStore';
 import { useEffect } from 'react';
 import GoogleCallback from './Pages/Auth/Login/GoogleCallback';
 import Home from './Pages/Home/Home';
+import Dashboard from './Pages/Dashboard/Dashboard';
+import ProtectedRoute from './Pages/Auth/ProtectedRoute';
 
 function App() {
   const { setUser } = useUserStore();
@@ -27,6 +29,14 @@ function App() {
         <Route path='/register' element={<Register />} />
         {/* Route to handle Google Login Callback */}
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
+        <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute/>
+            }
+          >
+            <Route path='' element={<Dashboard/>}/>
+          </Route>
         {/* Add more routes here as needed */}
       </Routes>
     </Layout>
