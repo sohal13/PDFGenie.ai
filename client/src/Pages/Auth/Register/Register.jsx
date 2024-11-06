@@ -1,13 +1,7 @@
 import { useState } from "react"; // Import useState for managing state
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+import {Card,CardContent,CardDescription,CardFooter,CardHeader,CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,8 +9,11 @@ import { Button } from "@/components/ui/button";
 import Logo from "../../components/Logo";
 import apiClient from "@/apiClient"; // Import your API client
 import { toast } from 'react-toastify';
+//import { Spinner } from '@/components/ui/spinner';
 
 function Register() {
+
+    const navigate = useNavigate();
     // State to hold form values and errors
     const [formData, setFormData] = useState({
         username: "",
@@ -24,10 +21,8 @@ function Register() {
         password: "",
         confirmPassword: "",
     });
+    const [loading, setLoading] = useState(false)
     console.log(formData);
-    
-    const [error, setError] = useState("");
-console.log(error);
 
     // Handle input change
     const handleChange = (e) => {
@@ -45,32 +40,36 @@ console.log(error);
 
     // Handle form submission
     const handleSubmit = async (e) => {
-      console.log("clicked");
-      
         e.preventDefault(); // Prevent default form submission behavior
-
+        setLoading(true)
         // Validate passwords
         if (formData.password !== formData.confirmPassword) {
-           toast.error("Passwords do not match!");
+            toast.error("Passwords do not match!");
             return;
         }
         try {
             // Send the registration data to the backend
-            const response = await apiClient.post("/api/v1/auth/register", {
+            const response = await apiClient.post("/manualauth/register", {
                 username: formData.username,
                 email: formData.email,
                 password: formData.password,
             });
+            const data = response.data;
+            console.log(data);
 
-            if (response.data.success) {
-                // Handle successful registration (e.g., redirect or show a success message)
-                console.log("Registration successful:", response.data.message);
+            if (data.success === true) {
+                setLoading(false)
+                toast.success("Registration successfull");
+                navigate('/login')
             } else {
-                setError(response.data.message || "Registration failed!");
+                setLoading(false)
+                toast.error(response.data.message || "Registration failed!");
             }
         } catch (err) {
-            console.error("Error during registration:", err);
-            setError("An error occurred during registration. Please try again.");
+            console.log(err);
+            
+            setLoading(false)
+            toast.error(err.response.data.error);
         }
     };
 
@@ -82,7 +81,6 @@ console.log(error);
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit}>
-                    {error && <div className="text-red-500 mb-2">{error}</div>} {/* Display error message */}
                     <div className="grid w-full items-center gap-4">
                         <div className="flex flex-col space-y-1.5">
                             <Label htmlFor="username">UserName</Label>
@@ -133,14 +131,14 @@ console.log(error);
                             />
                         </div>
                     </div>
-                    <Button type="submit" className="w-full mt-4">Register</Button> {/* Submit button */}
+                    <Button type="submit" disabled={loading} className="w-full mt-4">{loading ? "Rgistring.." : "Register"}</Button> {/* Submit button */}
                 </form>
             </CardContent>
             <CardFooter className="flex justify-between">
                 <Button onClick={googleAuth} className="w-full">
                     Sign in With <span className="rounded-full bg-white"><FcGoogle /></span>
                 </Button>
-              
+
             </CardFooter>
             <CardFooter>
                 <p className="text-sm">Already Have An Account? <Link to={'/login'} className="underline text-primary">Login</Link></p>

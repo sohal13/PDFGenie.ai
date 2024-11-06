@@ -4,8 +4,9 @@ import cors from "cors";
 import session from "express-session"; // Use express-session for better session management
 import passport from "passport";
 import passportSetup from './auth/passport.js';
-import authRoutes from './routes/auth.js';
-
+import googleRoutes from './routes/auth.js';
+import authRoutes from './routes/mnualAuth.js'
+import mongoose from "mongoose";
 dotenv.config();
 
 const app = express();
@@ -28,7 +29,7 @@ app.use(cors({
 
 // Set up session management
 app.use(session({
-    secret: process.env.SESSION_SECRET , // Use a secure secret
+    secret: process.env.SESSION_SECRET, // Use a secure secret
     resave: false, // Prevent resaving sessions that are not modified
     saveUninitialized: false, // Only save initialized sessions
     cookie: {
@@ -47,7 +48,9 @@ app.get('/health', (req, res) => {
 });
 
 // Auth routes
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', googleRoutes);
+app.use('/api/v1/manualauth', authRoutes);
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -59,8 +62,12 @@ app.use((err, req, res, next) => {
     });
 });
 
+
 // Start the server
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+    await mongoose.connect(process.env.MONGO_URI)
+        .then(() => console.log('MongoDB connected'))
+        .catch(err => console.log(`MongoDB connection error: ${err}`));
     console.log(`Server running on http://localhost:${PORT}`);
 });

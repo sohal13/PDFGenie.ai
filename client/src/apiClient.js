@@ -11,7 +11,7 @@ const apiClient = axios.create({
 // Optionally, you can add request and response interceptors
 apiClient.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('token');
+    const token = Cookies.get('pdfgenieai_tokentoken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
